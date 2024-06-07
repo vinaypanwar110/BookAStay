@@ -2,7 +2,7 @@
     const app = express();
     const mongoose =  require("mongoose");
 
-    const Listing = require("../Models/listing.js");
+    const Listing = require("./Models/listing.js");
 
     const MONGO_URL = "mongodb://localhost:27017/wanderlust";
     main()
@@ -36,12 +36,11 @@
             description:"beach",
             price : 1800,
             location:"calangute, Goa",
-            country:"India"
+            country:"India" 
         });
 
         await sampleListing.save();
         console.log("sample was saved ");
-        res.send("Successfull");
-    
+        res.send("Successful testing"); 
     });
 
