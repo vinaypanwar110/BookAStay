@@ -83,6 +83,7 @@
           const listing = await Listing.findById(id);
 
           res.render("listings/show.ejs",{listing});
+          
     });
 
 
