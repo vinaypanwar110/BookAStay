@@ -9,6 +9,8 @@ const wrapAsync = require("./utils/wrapAsync.js");
 const expressError = require("./utils/expressError.js");
 const MONGO_URL = "mongodb://localhost:27017/wanderlust";
 const { listingSchema } = require("./schema.js");
+const Review =require("./models/review.js");
+
 
 
 main()
@@ -35,6 +37,17 @@ app.use(express.static(path.join(__dirname, "public")));
 
 
 
+const validateListing = (res,req,next)=> {
+        let {error} = listingSchema.validate(req.body);
+        if(error){
+          let errMsg = error.details.map((el)=>el.message).join(",");
+
+          throw new expressError(400,errMsg);
+        }
+        else{
+          next();
+        }
+}
 
 
 
@@ -91,19 +104,11 @@ app.get(
 
 // create route
 app.post(
-  "/listings",
+  "/listings",validateListing,  
   wrapAsync(async (req, res, next) => {
-   
-    if (!req.body.listing) {
-      throw new expressError(400,"Send valid data");
-    } else {
       const newListing = new Listing(req.body.listing);
-      if(!newListing.description){
-        throw new expressError(400,"description is missing");
-      }
       await newListing.save();
       res.redirect("/listings");
-    }
   })
 );
 
@@ -124,11 +129,8 @@ app.get(
 
 // update route
 app.put(
-  "/listings/:id",
+  "/listings/:id",validateListing,  
   wrapAsync(async (req, res) => {
-    if (!req.body.listing) {
-      throw new expressError(400, "Send valid data for listing");
-    }
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, { ...req.body.listing });
     res.redirect(`/listings/${id}`);
@@ -146,6 +148,22 @@ app.delete(
     res.redirect("/listings");
   })
 );
+
+
+// review route 
+
+app.post("/listings/:id/reviews",async(req,res)=>{
+   let listing  = await Listing.findById(req.params.id);
+   let newReview = new Review(req.body.review);
+   listing.reviews.push(newReview);
+   await newReview.save();
+   await listing.save();
+
+
+   res.redirect(`/listings/${listing._id}`);
+});
+
+
 
 
 
