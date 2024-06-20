@@ -1,16 +1,15 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const Listing = require("./Models/listing.js");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
-const wrapAsync = require("./utils/wrapAsync.js");
 const expressError = require("./utils/expressError.js");
 const MONGO_URL = "mongodb://localhost:27017/wanderlust";
-const { listingSchema, reviewSchema } = require("./schema.js");
-const Review = require("./Models/review.js");
+const session = require("express-session");
+const flash = require("connect-flash");
 const listings  = require("./routes/listing.js");
+const reviews = require("./routes/review.js");
 
 main()
   .then(() => {
@@ -31,23 +30,44 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/listings",listings);
 
-  
-const validateReview = (res, req, next) => {
-  let { error } = reviewSchema.validate(req.body);
-  if (error) {
-    let errMsg = error.details.map((el) => el.message).join(",");
-
-    throw new expressError(400, errMsg);
-  } else {
-    next();
+const sessionOptions = {
+  secret: "mysupersecretcode",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000, 
+    maxAge: 7 * 24 * 60 * 60 * 1000, 
+    httpOnly: true,
   }
-};
+}
+
+
+
+
 
 app.get("/", (req, res) => {
-  res.send("this is root");
+  res.send("this is  root");
 });
+
+
+app.use(session(sessionOptions));
+app.use(flash());
+
+app.use((req,res,next)=>{
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+})
+
+app.use("/listings",listings);
+app.use("/listings/:id/reviews",reviews);
+  
+
+
+
+
+
 
 app.get("/testListing", async (req, res) => {
   let sampleListing = new Listing({
@@ -62,34 +82,9 @@ app.get("/testListing", async (req, res) => {
   res.send("Successful testing");
 });
 
-// review route
-  
-app.post(
-  "/listings/:id/reviews",
-  validateReview,
-  wrapAsync(async (req, res) => {
-    let listing = await Listing.findById(req.params.id);
-    let newReview = new Review(req.body.review);
-    listing.reviews.push(newReview);
-    await newReview.save();
-    await listing.save();
-    res.redirect(`/listings/${listing._id}`);
-  })
-);
 
-// delete review route
 
-app.delete(
-  "/listings/:id/reviews/:reviewId",
-  wrapAsync(async (req, res) => {
-    let { id, reviewId } = req.params;
 
-    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(reviewId);
-
-    res.redirect(`/listings/${id}`);
-  })
-);
 
 
 app.all("*", (req, res, next) => {
