@@ -21,7 +21,7 @@
   </div>
   <br />
 
-<%# if(currUser && currUser._id.equals(listing.owner._id)) { %> 
+<% if(currUser && currUser._id.equals(listing.owner._id)) { %> 
   <div class="btns">
     <a
       href="/listings/<%=listing._id%>/edit"
@@ -34,12 +34,13 @@
     </form>
   </div>
 
-   <%# } %> 
+   <% } %> 
 
+  
   <div class="col-8 offset-3 mb-3">
     <hr />
+    <% if(currUser){  %>
     <h4>Leave a Review</h4>
-
     <form
       method="POST"
       action="/listings/<%= listing.id %>/reviews"
@@ -74,10 +75,11 @@
       <button class="btn btn-outline-dark">Submit</button>
     </form>
 
+
     <hr />
+  <%}%>
 
-    <h4>All Reviews</h4>
-
+    <p><b>All Reviews</b></p>
     <div class="row">
       <% for(review of listing.reviews) { %>
 
