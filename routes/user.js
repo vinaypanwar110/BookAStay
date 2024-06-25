@@ -34,6 +34,19 @@ router.get("/login", (req, res) => {
   res.render("users/login.ejs");
 });
 
+// router.post(
+//   "/login",
+//   saveRedirectUrl,
+//   passport.authenticate("local", {
+//     failureRedirect: "/login",
+//     failureFlash: true,
+//   }),
+//   async (req, res) => {
+//     req.flash("success", "Welcome back to Wanderlust you're Login!");
+//     let redirectUrl = res.locals.redirectUrl || "/listings";
+//     res.redirect(redirectUrl); 
+//   }
+// );
 router.post(
   "/login",
   saveRedirectUrl,
@@ -42,9 +55,14 @@ router.post(
     failureFlash: true,
   }),
   async (req, res) => {
-    req.flash("success", "Welcome back to Wanderlust you're Login!");
-    let redirectUrl = res.locals.redirectUrl || "/listings";
-    res.redirect(redirectUrl); 
+    try {
+      req.flash("success", "Welcome back to Wanderlust! You're logged in!");
+      let redirectUrl = res.locals.redirectUrl || "/listings";
+      res.redirect(redirectUrl);
+    } catch (error) {
+      console.error("Error during login:", error);
+      res.redirect("/login");
+    }
   }
 );
 
