@@ -1,3 +1,7 @@
+if(process.env.NODE_ENV != "productions"){
+  require("dotenv").config();
+}
+console.log(process.env.SECERT);
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
