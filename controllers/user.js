@@ -1,4 +1,4 @@
-const User = require("../Models/user");
+const User = require("../Models/user.js");
 
 module.exports.signup = async (req, res) => {
     try {
@@ -38,7 +38,7 @@ module.exports.signup = async (req, res) => {
     }
   };
 
-  module.exports.logout = (req, res) => {
+  module.exports.logout = (req, res,next) => {
     req.logout((err) => {
       if (err) {
         return next(err);

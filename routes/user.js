@@ -4,6 +4,7 @@ const User = require("../Models/user.js");
 const wrapAsync = require("../utils/wrapAsync");
 const passport = require("passport");
 const { saveRedirectUrl } = require("../middleware.js");
+const { signUp } = require("../controllers/user.js");
 const userController = require("../controllers/user.js");
 
 router
@@ -20,7 +21,7 @@ router
       failureRedirect: "/login",
       failureFlash: true,
     }),
-    userController.login
+    userController.login,
   );
 router.get("/logout", userController.logout);
 module.exports = router;
